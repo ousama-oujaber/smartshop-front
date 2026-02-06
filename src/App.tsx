@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { LoginPage } from './features/auth/LoginPage';
 import { ProductsListPage, ProductFormPage } from './features/products';
+import { ClientsListPage, ClientFormPage, ClientDetailPage } from './features/clients';
 import { Loader2 } from 'lucide-react';
 
 // Protected Route Component
@@ -60,6 +61,39 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProductFormPage />
+          </ProtectedRoute>
+        }
+      />
+      {/* Clients Routes */}
+      <Route
+        path="/clients"
+        element={
+          <ProtectedRoute>
+            <ClientsListPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/clients/new"
+        element={
+          <ProtectedRoute>
+            <ClientFormPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/clients/:id"
+        element={
+          <ProtectedRoute>
+            <ClientDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/clients/:id/edit"
+        element={
+          <ProtectedRoute>
+            <ClientFormPage />
           </ProtectedRoute>
         }
       />
