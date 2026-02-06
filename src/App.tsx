@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { LoginPage } from './features/auth/LoginPage';
+import { ProductsListPage, ProductFormPage } from './features/products';
 import { Loader2 } from 'lucide-react';
 
 // Protected Route Component
@@ -37,7 +38,31 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      {/* Add more routes here */}
+      {/* Products Routes */}
+      <Route
+        path="/products"
+        element={
+          <ProtectedRoute>
+            <ProductsListPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/products/new"
+        element={
+          <ProtectedRoute>
+            <ProductFormPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/products/:id/edit"
+        element={
+          <ProtectedRoute>
+            <ProductFormPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
