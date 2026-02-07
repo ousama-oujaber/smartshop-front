@@ -66,4 +66,9 @@ export const clientService = {
         const response = await api.get<Order[]>(`/clients/${id}/orders`);
         return response.data;
     },
+
+    getOrderDates: async (id: number): Promise<{ firstOrderDate: string | null; lastOrderDate: string | null }> => {
+        const response = await api.get<{ firstOrderDate: string | null; lastOrderDate: string | null }>(`/clients/${id}/order-dates`);
+        return response.data;
+    },
 };

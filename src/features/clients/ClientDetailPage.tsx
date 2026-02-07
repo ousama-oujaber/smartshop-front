@@ -46,6 +46,7 @@ export function ClientDetailPage() {
 
     const [client, setClient] = useState<Client | null>(null);
     const [orders, setOrders] = useState<Order[]>([]);
+    const [orderDates, setOrderDates] = useState<{ firstOrderDate: string | null; lastOrderDate: string | null }>({ firstOrderDate: null, lastOrderDate: null });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -57,12 +58,14 @@ export function ClientDetailPage() {
         setLoading(true);
         setError(null);
         try {
-            const [clientData, orderHistory] = await Promise.all([
+            const [clientData, orderHistory, dates] = await Promise.all([
                 clientService.getById(Number(id)),
-                clientService.getOrderHistory(Number(id))
+                clientService.getOrderHistory(Number(id)),
+                clientService.getOrderDates(Number(id))
             ]);
             setClient(clientData);
             setOrders(orderHistory);
+            setOrderDates(dates);
         } catch (err) {
             setError('Failed to load client details');
             console.error('Error loading client data:', err);
@@ -221,14 +224,14 @@ export function ClientDetailPage() {
                             <Calendar className="w-5 h-5" />
                             <span className="text-sm font-medium">First Order</span>
                         </div>
-                        <p className="text-lg font-semibold text-gray-900">{formatDate(client.firstOrderDate)}</p>
+                        <p className="text-lg font-semibold text-gray-900">{formatDate(orderDates.firstOrderDate)}</p>
                     </div>
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                         <div className="flex items-center gap-3 text-gray-500 mb-2">
                             <Calendar className="w-5 h-5" />
                             <span className="text-sm font-medium">Last Order</span>
                         </div>
-                        <p className="text-lg font-semibold text-gray-900">{formatDate(client.lastOrderDate)}</p>
+                        <p className="text-lg font-semibold text-gray-900">{formatDate(orderDates.lastOrderDate)}</p>
                     </div>
                 </div>
 

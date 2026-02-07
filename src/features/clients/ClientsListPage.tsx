@@ -2,19 +2,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clientService, type Client } from '../../services/client.service';
 import { useAuth } from '../auth/AuthContext';
+import { ClientCard } from './ClientCard';
 
 import {
     Plus,
     Search,
-    Edit,
-    Eye,
     Users,
     AlertCircle,
     Loader2,
-    Mail,
-    ShoppingBag,
-    CreditCard,
-    Calendar
 } from 'lucide-react';
 
 const formatPrice = (amount: number): string => {
@@ -67,25 +62,6 @@ export function ClientsListPage() {
         client.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const TierBadge = ({ tier }: { tier: Client['tier'] }) => {
-        const styles = {
-            BASIC: 'from-gray-100 to-gray-200 text-gray-700',
-            SILVER: 'from-gray-200 to-gray-300 text-gray-800',
-            GOLD: 'from-amber-200 to-yellow-400 text-yellow-900',
-            PLATINUM: 'from-indigo-200 to-purple-400 text-indigo-900',
-        };
-
-        return (
-            <span className={`
-                inline-flex items-center px-3 py-1 rounded-full
-                text-xs font-bold uppercase tracking-wide
-                bg-gradient-to-r ${styles[tier]}
-                shadow-sm
-            `}>
-                {tier}
-            </span>
-        );
-    };
 
     return (
         <div className="min-h-screen bg-gray-50 p-6">
@@ -164,91 +140,7 @@ export function ClientsListPage() {
                     /* Clients Grid */
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredClients.map((client) => (
-                            <div
-                                key={client.id}
-                                className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow"
-                            >
-                                {/* Card Header */}
-                                <div className="p-6 border-b border-gray-100">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                                                <span className="text-lg font-semibold text-indigo-600">
-                                                    {client.fullName.charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <h3 className="font-semibold text-gray-900">{client.fullName}</h3>
-                                                <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
-                                                    <Mail className="w-3.5 h-3.5" />
-                                                    {client.email}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <TierBadge tier={client.tier} />
-                                    </div>
-                                </div>
-
-                                {/* Stats */}
-                                <div className="p-6 grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                                            <CreditCard className="w-4 h-4" />
-                                            Total Spent
-                                        </div>
-                                        <p className="text-lg font-semibold text-gray-900 font-mono">
-                                            {formatPrice(client.totalSpent)}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                                            <ShoppingBag className="w-4 h-4" />
-                                            Orders
-                                        </div>
-                                        <p className="text-lg font-semibold text-gray-900">
-                                            {client.totalOrders}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                                            <Calendar className="w-4 h-4" />
-                                            First Order
-                                        </div>
-                                        <p className="text-sm text-gray-700">
-                                            {formatDate(client.firstOrderDate)}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                                            <Calendar className="w-4 h-4" />
-                                            Last Order
-                                        </div>
-                                        <p className="text-sm text-gray-700">
-                                            {formatDate(client.lastOrderDate)}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center gap-2">
-                                    <button
-                                        onClick={() => navigate(`/clients/${client.id}`)}
-                                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                        View Details
-                                    </button>
-                                    {isAdmin && (
-                                        <button
-                                            onClick={() => navigate(`/clients/${client.id}/edit`)}
-                                            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                                            title="Edit"
-                                        >
-                                            <Edit className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
+                            <ClientCard key={client.id} client={client} isAdmin={isAdmin} />
                         ))}
                     </div>
                 )}
