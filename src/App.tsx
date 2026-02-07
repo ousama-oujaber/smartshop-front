@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { LoginPage } from './features/auth/LoginPage';
 import { ProductsListPage, ProductFormPage } from './features/products';
 import { ClientsListPage, ClientFormPage, ClientDetailPage } from './features/clients';
+import { OrdersListPage, OrderDetailPage, CreateOrderPage } from './features/orders';
 import { Loader2 } from 'lucide-react';
 
 // Protected Route Component
@@ -94,6 +95,31 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <ClientFormPage />
+          </ProtectedRoute>
+        }
+      />
+      {/* Orders Routes */}
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <OrdersListPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/orders/new"
+        element={
+          <ProtectedRoute>
+            <CreateOrderPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/orders/:id"
+        element={
+          <ProtectedRoute>
+            <OrderDetailPage />
           </ProtectedRoute>
         }
       />
