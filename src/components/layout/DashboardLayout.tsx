@@ -24,11 +24,11 @@ export const DashboardLayout: React.FC = () => {
     };
 
     const navItems = [
-        { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-        { to: '/products', icon: Package, label: 'Products' },
-        { to: '/clients', icon: Users, label: 'Clients' },
-        { to: '/orders', icon: ShoppingCart, label: 'Orders' },
-    ];
+        { to: '/', icon: LayoutDashboard, label: 'Dashboard', roles: ['ADMIN', 'CLIENT'] },
+        { to: '/products', icon: Package, label: 'Products', roles: ['ADMIN', 'CLIENT'] },
+        { to: '/clients', icon: Users, label: 'Clients', roles: ['ADMIN'] },
+        { to: '/orders', icon: ShoppingCart, label: user?.role === 'CLIENT' ? 'My Orders' : 'Orders', roles: ['ADMIN', 'CLIENT'] },
+    ].filter(item => user?.role && item.roles.includes(user.role));
 
     return (
         <div className="h-screen bg-gray-50 flex overflow-hidden">

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { StatCard } from './components/StatCard';
-import { Users, DollarSign, ShoppingBag, AlertTriangle, TrendingUp, Loader2 } from 'lucide-react';
+import { Users, DollarSign, ShoppingBag, AlertTriangle, TrendingUp, Loader2, ShoppingCart } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { cn } from '../../lib/utils';
 import { orderService, type Order } from '../../services/order.service';
 import { clientService, type Client } from '../../services/client.service';
 import { productService, type Product } from '../../services/product.service';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 
 const formatPrice = (amount: number): string => {
     return new Intl.NumberFormat('fr-MA', {
@@ -18,6 +19,7 @@ const formatPrice = (amount: number): string => {
 
 export const DashboardPage: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [orders, setOrders] = useState<Order[]>([]);
     const [clients, setClients] = useState<Client[]>([]);
@@ -26,14 +28,25 @@ export const DashboardPage: React.FC = () => {
     useEffect(() => {
         const loadDashboardData = async () => {
             try {
-                const [ordersData, clientsData, productsData] = await Promise.all([
-                    orderService.getAll(),
-                    clientService.getAll(),
-                    productService.getAll()
-                ]);
-                setOrders(ordersData);
-                setClients(clientsData);
-                setProducts(productsData);
+                if (user?.role === 'CLIENT') {
+                    // Load Client specific data
+                    const [_myProfile, myOrders] = await Promise.all([
+                        clientService.getCurrentClient(),
+                        clientService.getMyOrders()
+                    ]);
+                    setOrders(myOrders);
+
+                } else {
+                    // Load Admin specific data
+                    const [ordersData, clientsData, productsData] = await Promise.all([
+                        orderService.getAll(),
+                        clientService.getAll(),
+                        productService.getAll()
+                    ]);
+                    setOrders(ordersData);
+                    setClients(clientsData);
+                    setProducts(productsData);
+                }
             } catch (error) {
                 console.error('Failed to load dashboard data:', error);
             } finally {
@@ -41,10 +54,12 @@ export const DashboardPage: React.FC = () => {
             }
         };
 
-        loadDashboardData();
-    }, []);
+        if (user) {
+            loadDashboardData();
+        }
+    }, [user]);
 
-    // Calculate Stats
+    // Calculate Stats (Admin specific, or general if applicable)
     const totalRevenue = orders
         .filter(o => o.status !== 'CANCELED' && o.status !== 'REJECTED')
         .reduce((sum, order) => sum + order.totalAmount, 0);
@@ -56,32 +71,54 @@ export const DashboardPage: React.FC = () => {
     // improving sort by ID desc as a proxy for date since date is missing
     const recentOrders = [...orders].sort((a, b) => b.id - a.id).slice(0, 5);
 
-    const stats = [
-        {
-            title: 'Total Revenue',
-            value: formatPrice(totalRevenue),
-            icon: DollarSign,
-            trend: { value: 12.5, isPositive: true } // calculated trend would require historical data
-        },
-        {
-            title: 'Active Orders',
-            value: activeOrdersCount.toString(),
-            icon: ShoppingBag,
-            trend: { value: 8.2, isPositive: true }
-        },
-        {
-            title: 'Total Clients',
-            value: clients.length.toString(),
-            icon: Users,
-            trend: { value: 4.3, isPositive: true }
-        },
-        {
-            title: 'Low Stock Items',
-            value: lowStockCount.toString(),
-            icon: AlertTriangle,
-            trend: { value: lowStockCount > 0 ? -10 : 0, isPositive: lowStockCount === 0 }
-        }
-    ];
+    // Calculate stats based on role
+    const stats = user?.role === 'CLIENT'
+        ? [
+            {
+                title: 'My Total Spent',
+                value: formatPrice(orders.reduce((sum, o) => sum + (o.status !== 'CANCELED' && o.status !== 'REJECTED' ? o.totalAmount : 0), 0)), // Calculate from loaded orders or use profile data if available globally
+                icon: DollarSign,
+                trend: { value: 0, isPositive: true }
+            },
+            {
+                title: 'My Active Orders',
+                value: orders.filter(o => o.status === 'PENDING' || o.status === 'CONFIRMED').length.toString(),
+                icon: ShoppingBag,
+                trend: { value: 0, isPositive: true }
+            },
+            {
+                title: 'Total Orders',
+                value: orders.length.toString(),
+                icon: ShoppingCart,
+                trend: { value: 0, isPositive: true }
+            }
+        ]
+        : [
+            {
+                title: 'Total Revenue',
+                value: formatPrice(totalRevenue),
+                icon: DollarSign,
+                trend: { value: 12.5, isPositive: true }
+            },
+            {
+                title: 'Active Orders',
+                value: activeOrdersCount.toString(),
+                icon: ShoppingBag,
+                trend: { value: 8.2, isPositive: true }
+            },
+            {
+                title: 'Total Clients',
+                value: clients.length.toString(),
+                icon: Users,
+                trend: { value: 4.3, isPositive: true }
+            },
+            {
+                title: 'Low Stock Items',
+                value: lowStockCount.toString(),
+                icon: AlertTriangle,
+                trend: { value: lowStockCount > 0 ? -10 : 0, isPositive: lowStockCount === 0 }
+            }
+        ];
 
     if (loading) {
         return (
@@ -189,7 +226,7 @@ export const DashboardPage: React.FC = () => {
                                     <div className="w-full bg-black/20 rounded-full h-2 mb-2">
                                         <div
                                             className="bg-white h-2 rounded-full transition-all duration-1000 ease-out"
-                                            style={{ width: `${percentage}%` }}
+                                            style={{ width: `${percentage}% ` }}
                                         ></div>
                                     </div>
                                     <p className="text-sm text-indigo-100">{percentage.toFixed(1)}% of monthly goal reached</p>

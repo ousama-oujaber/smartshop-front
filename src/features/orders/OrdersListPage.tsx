@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { orderService, type Order, type OrderStatus, type PaymentStatus } from '../../services/order.service';
+import { clientService } from '../../services/client.service';
+import { useAuth } from '../auth/AuthContext';
 import { cn } from '../../lib/utils';
 import {
     Plus,
@@ -26,6 +28,7 @@ const formatPrice = (amount: number): string => {
 
 export function OrdersListPage() {
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
@@ -37,7 +40,9 @@ export function OrdersListPage() {
         setLoading(true);
         setError(null);
         try {
-            const data = await orderService.getAll();
+            const data = user?.role === 'CLIENT'
+                ? await clientService.getMyOrders()
+                : await orderService.getAll();
             setOrders(data);
         } catch (err) {
             setError('Failed to load orders. Please try again.');
@@ -45,14 +50,14 @@ export function OrdersListPage() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         fetchOrders();
     }, [fetchOrders]);
 
     const filteredOrders = orders.filter(order => {
-        const matchesSearch = 
+        const matchesSearch =
             order.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             order.id.toString().includes(searchQuery);
         const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
