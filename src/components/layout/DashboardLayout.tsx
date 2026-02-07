@@ -31,7 +31,7 @@ export const DashboardLayout: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="h-screen bg-gray-50 flex overflow-hidden">
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
                 <div
@@ -43,13 +43,13 @@ export const DashboardLayout: React.FC = () => {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed lg:static top-0 left-0 z-50 h-screen w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out lg:translate-x-0",
+                    "fixed lg:static top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col",
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
                 <div className="h-full flex flex-col">
                     {/* Logo */}
-                    <div className="h-16 flex items-center px-6 border-b border-gray-100">
+                    <div className="h-16 flex-shrink-0 flex items-center px-6 border-b border-gray-100">
                         <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                             SmartShop
                         </span>
@@ -76,7 +76,7 @@ export const DashboardLayout: React.FC = () => {
                     </nav>
 
                     {/* User Profile & Logout */}
-                    <div className="p-4 border-t border-gray-100">
+                    <div className="p-4 border-t border-gray-100 flex-shrink-0">
                         <div className="flex items-center gap-3 mb-4 px-2">
                             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
                                 {user?.username?.charAt(0).toUpperCase() || 'U'}
@@ -97,10 +97,10 @@ export const DashboardLayout: React.FC = () => {
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0">
+            {/* Main Content Wrapper */}
+            <div className="flex-1 flex flex-col h-full overflow-hidden">
                 {/* Header */}
-                <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8">
+                <header className="h-16 flex-shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsSidebarOpen(true)}
@@ -126,8 +126,8 @@ export const DashboardLayout: React.FC = () => {
                     </div>
                 </header>
 
-                {/* Page Content */}
-                <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
+                {/* Scrollable Page Content */}
+                <main className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-8">
                     <Outlet />
                 </main>
             </div>
