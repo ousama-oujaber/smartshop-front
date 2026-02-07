@@ -372,7 +372,7 @@ export function OrderDetailPage() {
                                     <CreditCard className="w-5 h-5 text-gray-400" />
                                     Payments
                                 </h2>
-                                {order.status !== 'CANCELED' && order.status !== 'REJECTED' && (
+                                {order.status !== 'CANCELED' && order.status !== 'REJECTED' && order.status !== 'CONFIRMED' && (
                                     <button
                                         onClick={() => navigate(`/orders/${order.id}/payments/new`)}
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
@@ -487,7 +487,7 @@ export function OrderDetailPage() {
                                     </div>
                                 </div>
                             </div>
-                            {remainingAmount > 0 && order.status !== 'CANCELED' && order.status !== 'REJECTED' && (
+                            {remainingAmount > 0 && order.status !== 'CANCELED' && order.status !== 'REJECTED' && order.status !== 'CONFIRMED' && (
                                 <button
                                     onClick={() => navigate(`/orders/${order.id}/payments/new`)}
                                     className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"

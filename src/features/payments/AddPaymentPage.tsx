@@ -115,10 +115,19 @@ export function AddPaymentPage() {
     const loadOrder = async () => {
         setLoading(true);
         try {
-            const data = await orderService.getById(Number(orderId));
-            setOrder(data);
-            if (data && formData.amount === 0) {
-                setFormData(prev => ({ ...prev, amount: data.totalAmount }));
+            const [orderData, paymentsData] = await Promise.all([
+                orderService.getById(Number(orderId)),
+                paymentService.getByOrderId(Number(orderId))
+            ]);
+            setOrder(orderData);
+            const totalCovered = paymentsData
+                .filter(p => p.paymentStatus !== 'REJETE')
+                .reduce((sum, p) => sum + p.amount, 0);
+
+            const remaining = Math.max(0, orderData.totalAmount - totalCovered);
+
+            if (formData.amount === 0) {
+                setFormData(prev => ({ ...prev, amount: remaining }));
             }
         } catch (err) {
             setError('Failed to load order details');
@@ -134,8 +143,14 @@ export function AddPaymentPage() {
         if (!formData.amount || formData.amount <= 0) {
             newErrors.amount = 'Amount must be greater than 0';
         } else if (order && formData.amount > order.totalAmount) {
+            // allowing overpayment for now as tip or error, but maybe strictly shouldn't exceed remaining?
+            // keeping existing loose check for totalAmount
         }
 
+        // Cash Limit Check (20,000 DH)
+        if (formData.paymentMethod === 'ESPECES' && formData.amount > 20000) {
+            newErrors.amount = 'Cash payments cannot exceed 20,000 DH. Please split the payment.';
+        }
         if (!formData.reference.trim()) {
             newErrors.reference = 'Reference is required';
         }
