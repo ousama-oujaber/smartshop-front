@@ -12,22 +12,6 @@ import {
     Loader2,
 } from 'lucide-react';
 
-const formatPrice = (amount: number): string => {
-    return new Intl.NumberFormat('fr-MA', {
-        style: 'currency',
-        currency: 'MAD',
-        minimumFractionDigits: 2,
-    }).format(amount);
-};
-
-const formatDate = (dateStr: string | null): string => {
-    if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleDateString('fr-MA', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-};
 
 export function ClientsListPage() {
     const navigate = useNavigate();
