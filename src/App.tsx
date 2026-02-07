@@ -4,6 +4,7 @@ import { LoginPage } from './features/auth/LoginPage';
 import { ProductsListPage, ProductFormPage } from './features/products';
 import { ClientsListPage, ClientFormPage, ClientDetailPage } from './features/clients';
 import { OrdersListPage, OrderDetailPage, CreateOrderPage } from './features/orders';
+import { AddPaymentPage } from './features/payments';
 import { Loader2 } from 'lucide-react';
 
 // Protected Route Component
@@ -120,6 +121,23 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <OrderDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      {/* Payments Routes */}
+      <Route
+        path="/orders/:orderId/payments/new"
+        element={
+          <ProtectedRoute>
+            <AddPaymentPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payments/new"
+        element={
+          <ProtectedRoute>
+            <AddPaymentPage />
           </ProtectedRoute>
         }
       />
