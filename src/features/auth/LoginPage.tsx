@@ -6,13 +6,19 @@ import { Input } from '../../components/ui/Input';
 import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-    const { login } = useAuth();
+    const { login, user, loading } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    React.useEffect(() => {
+        if (!loading && user) {
+            navigate('/');
+        }
+    }, [user, loading, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
