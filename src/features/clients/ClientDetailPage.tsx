@@ -271,7 +271,7 @@ export function ClientDetailPage() {
                                     {/* Order Items */}
                                     <div className="bg-gray-50 rounded-lg p-4 mb-4">
                                         <div className="space-y-2">
-                                            {order.items.map((item, idx) => (
+                                            {order.items?.map((item, idx) => (
                                                 <div key={idx} className="flex items-center justify-between text-sm">
                                                     <div className="flex items-center gap-2">
                                                         <Package className="w-4 h-4 text-gray-400" />
