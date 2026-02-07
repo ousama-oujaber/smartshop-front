@@ -76,39 +76,28 @@ export function AddPaymentPage() {
         }
     }, [orderId]);
 
-    // Effect to handle prefixes based on payment method
+
     useEffect(() => {
         setFormData(prev => {
             let newRef = prev.reference;
             let newCheque = prev.chequeNumber;
 
-            // Handle Reference Prefix
             if (prev.paymentMethod === 'ESPECES') {
                 if (!newRef || newRef.startsWith('CHK-') || newRef.startsWith('VIR-')) {
                     newRef = 'REF-';
                 } else if (!newRef.startsWith('REF-')) {
-                    // If user manually cleared it, maybe we don't force it immediately? 
-                    // But requirement says "by default should start with".
-                    // Let's only change it if it's empty or has wrong prefix.
                     if (newRef === '') newRef = 'REF-';
                 }
             } else if (prev.paymentMethod === 'CHEQUE') {
-                // For Cheque, usually reference might be the check number repeated or a specific ref.
-                // Requirement says "in other but in check should start Cheque Number with CHK-"
-                // It implies Reference for check might also need a prefix or just be something else?
-                // Let's assume Reference gets a generic REF- or specific pattern if not specified.
-                // But specifically for Cheque Number:
                 if (!newCheque || !newCheque.startsWith('CHK-')) {
                     newCheque = 'CHK-';
                 }
-                // If Payment Method is Cheque, Reference often tracks the Check # too, but let's keep it REF- for consistency unless specified.
                 if (!newRef || newRef.startsWith('REF-') || newRef.startsWith('VIR-')) {
-                    // Maybe keep it as REF-? User didn't specify strict rule for Ref in Check/Transfer, checks implies "alse in other" (also in others).
                     if (newRef === '') newRef = 'REF-';
                 }
             } else if (prev.paymentMethod === 'VIREMENT') {
                 if (!newRef || newRef.startsWith('CHK-') || newRef.startsWith('REF-')) {
-                    newRef = 'VIR-'; // A common prefix for transfers
+                    newRef = 'VIR-';
                 } else if (newRef === '') {
                     newRef = 'VIR-';
                 }
@@ -128,12 +117,7 @@ export function AddPaymentPage() {
         try {
             const data = await orderService.getById(Number(orderId));
             setOrder(data);
-            // Auto-fill amount if 0
             if (data && formData.amount === 0) {
-                // Calculate remaining
-                // We need payments to do this accurately, but we don't have them loaded here.
-                // Ideally we'd fetch them or the order DTO would have 'remainingAmount'.
-                // For now, let's leave it 0 or set to total if we assume no partials yet.
                 setFormData(prev => ({ ...prev, amount: data.totalAmount }));
             }
         } catch (err) {
@@ -150,9 +134,6 @@ export function AddPaymentPage() {
         if (!formData.amount || formData.amount <= 0) {
             newErrors.amount = 'Amount must be greater than 0';
         } else if (order && formData.amount > order.totalAmount) {
-            // This check might be too strict if we consider remaining amount, but for now it's safe.
-            // Better would be to compare against remaining.
-            // newErrors.amount = 'Amount cannot exceed order total';
         }
 
         if (!formData.reference.trim()) {
