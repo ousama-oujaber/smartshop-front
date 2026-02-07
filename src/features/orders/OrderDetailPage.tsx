@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { orderService, type Order, type OrderStatus } from '../../services/order.service';
 import { paymentService, type Payment, type PaymentStatus, type PaymentMethod } from '../../services/payment.service';
 import { useAuth } from '../auth/AuthContext';
@@ -78,54 +79,102 @@ export function OrderDetailPage() {
     };
 
     const handleConfirm = async () => {
-        if (!confirm('Are you sure you want to confirm this order?')) return;
-        setActionLoading(true);
-        try {
-            const updated = await orderService.confirm(Number(id));
-            setOrder(updated);
-        } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to confirm order');
-        } finally {
-            setActionLoading(false);
+        const result = await Swal.fire({
+            title: 'Confirm Order?',
+            text: 'Are you sure you want to confirm this order?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#16a34a',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, confirm it!'
+        });
+
+        if (result.isConfirmed) {
+            setActionLoading(true);
+            try {
+                const updated = await orderService.confirm(Number(id));
+                setOrder(updated);
+                Swal.fire('Confirmed!', 'The order has been confirmed.', 'success');
+            } catch (err: any) {
+                Swal.fire('Error', err.response?.data?.message || 'Failed to confirm order', 'error');
+            } finally {
+                setActionLoading(false);
+            }
         }
     };
 
     const handleCancel = async () => {
-        if (!confirm('Are you sure you want to cancel this order?')) return;
-        setActionLoading(true);
-        try {
-            const updated = await orderService.cancel(Number(id));
-            setOrder(updated);
-        } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to cancel order');
-        } finally {
-            setActionLoading(false);
+        const result = await Swal.fire({
+            title: 'Cancel Order?',
+            text: 'Are you sure you want to cancel this order?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, cancel it!'
+        });
+
+        if (result.isConfirmed) {
+            setActionLoading(true);
+            try {
+                const updated = await orderService.cancel(Number(id));
+                setOrder(updated);
+                Swal.fire('Cancelled!', 'The order has been cancelled.', 'success');
+            } catch (err: any) {
+                Swal.fire('Error', err.response?.data?.message || 'Failed to cancel order', 'error');
+            } finally {
+                setActionLoading(false);
+            }
         }
     };
 
     const handleEncash = async (paymentId: number) => {
-        if (!confirm('Are you sure you want to encash this payment?')) return;
-        setActionLoading(true);
-        try {
-            await paymentService.encash(paymentId);
-            loadOrderData();
-        } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to encash payment');
-        } finally {
-            setActionLoading(false);
+        const result = await Swal.fire({
+            title: 'Encash Payment?',
+            text: 'Are you sure you want to encash this payment?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#16a34a',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, encash it!'
+        });
+
+        if (result.isConfirmed) {
+            setActionLoading(true);
+            try {
+                await paymentService.encash(paymentId);
+                loadOrderData();
+                Swal.fire('Encashed!', 'The payment has been encashed.', 'success');
+            } catch (err: any) {
+                Swal.fire('Error', err.response?.data?.message || 'Failed to encash payment', 'error');
+            } finally {
+                setActionLoading(false);
+            }
         }
     };
 
     const handleReject = async (paymentId: number) => {
-        if (!confirm('Are you sure you want to reject this payment?')) return;
-        setActionLoading(true);
-        try {
-            await paymentService.reject(paymentId);
-            loadOrderData();
-        } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to reject payment');
-        } finally {
-            setActionLoading(false);
+        const result = await Swal.fire({
+            title: 'Reject Payment?',
+            text: 'Are you sure you want to reject this payment?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, reject it!'
+        });
+
+        if (result.isConfirmed) {
+            setActionLoading(true);
+            try {
+                await paymentService.reject(paymentId);
+                loadOrderData();
+                Swal.fire('Rejected!', 'The payment has been rejected.', 'success');
+            } catch (err: any) {
+                Swal.fire('Error', err.response?.data?.message || 'Failed to reject payment', 'error');
+            } finally {
+                setActionLoading(false);
+            }
         }
     };
 

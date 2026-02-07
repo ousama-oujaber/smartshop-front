@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { productService, type Product } from '../../services/product.service';
 import { useAuth } from '../auth/AuthContext';
 import { cn } from '../../lib/utils';
@@ -71,13 +72,25 @@ export function ProductsListPage() {
     }, [fetchProducts]);
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Are you sure you want to delete this product?')) return;
-        try {
-            await productService.delete(id);
-            fetchProducts();
-        } catch (err) {
-            console.error('Error deleting product:', err);
-            alert('Failed to delete product');
+        const result = await Swal.fire({
+            title: 'Delete Product?',
+            text: 'Are you sure you want to delete this product?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await productService.delete(id);
+                fetchProducts();
+                Swal.fire('Deleted!', 'The product has been deleted.', 'success');
+            } catch (err) {
+                console.error('Error deleting product:', err);
+                Swal.fire('Error', 'Failed to delete product', 'error');
+            }
         }
     };
 
@@ -85,9 +98,10 @@ export function ProductsListPage() {
         try {
             await productService.restore(id);
             fetchProducts();
+            Swal.fire('Restored!', 'The product has been restored.', 'success');
         } catch (err) {
             console.error('Error restoring product:', err);
-            alert('Failed to restore product');
+            Swal.fire('Error', 'Failed to restore product', 'error');
         }
     };
 
