@@ -292,7 +292,7 @@ export function OrderDetailPage() {
                                 </h2>
                             </div>
                             <div className="divide-y divide-gray-200">
-                                {order.items.map((item, idx) => (
+                                {order.items?.map((item, idx) => (
                                     <div key={idx} className="px-6 py-4 flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -333,7 +333,7 @@ export function OrderDetailPage() {
                                     </button>
                                 )}
                             </div>
-                            
+
                             {payments.length === 0 ? (
                                 <div className="p-8 text-center">
                                     <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-3" />
@@ -362,7 +362,7 @@ export function OrderDetailPage() {
                                                     {formatPrice(payment.amount)}
                                                 </p>
                                             </div>
-                                            
+
                                             {/* Payment Details */}
                                             <div className="ml-13 pl-12 text-sm text-gray-600 space-y-1">
                                                 <p>Ref: {payment.reference}</p>

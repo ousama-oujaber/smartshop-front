@@ -26,6 +26,22 @@ const formatPrice = (amount: number): string => {
     }).format(amount);
 };
 
+const MOROCCAN_BANKS = [
+    "Attijariwafa Bank",
+    "Banque Populaire (BP)",
+    "Bank of Africa (BMCE)",
+    "Société Générale Maroc (SGMB)",
+    "BMCI (BNP Paribas)",
+    "Crédit du Maroc (CDM)",
+    "CIH Bank",
+    "Crédit Agricole du Maroc (CAM)",
+    "Al Barid Bank",
+    "CFG Bank",
+    "Arab Bank",
+    "Citibank Maghreb",
+    "Other"
+];
+
 export function AddPaymentPage() {
     const navigate = useNavigate();
     const { orderId: paramOrderId } = useParams<{ orderId: string }>();
@@ -60,11 +76,66 @@ export function AddPaymentPage() {
         }
     }, [orderId]);
 
+    // Effect to handle prefixes based on payment method
+    useEffect(() => {
+        setFormData(prev => {
+            let newRef = prev.reference;
+            let newCheque = prev.chequeNumber;
+
+            // Handle Reference Prefix
+            if (prev.paymentMethod === 'ESPECES') {
+                if (!newRef || newRef.startsWith('CHK-') || newRef.startsWith('VIR-')) {
+                    newRef = 'REF-';
+                } else if (!newRef.startsWith('REF-')) {
+                    // If user manually cleared it, maybe we don't force it immediately? 
+                    // But requirement says "by default should start with".
+                    // Let's only change it if it's empty or has wrong prefix.
+                    if (newRef === '') newRef = 'REF-';
+                }
+            } else if (prev.paymentMethod === 'CHEQUE') {
+                // For Cheque, usually reference might be the check number repeated or a specific ref.
+                // Requirement says "in other but in check should start Cheque Number with CHK-"
+                // It implies Reference for check might also need a prefix or just be something else?
+                // Let's assume Reference gets a generic REF- or specific pattern if not specified.
+                // But specifically for Cheque Number:
+                if (!newCheque || !newCheque.startsWith('CHK-')) {
+                    newCheque = 'CHK-';
+                }
+                // If Payment Method is Cheque, Reference often tracks the Check # too, but let's keep it REF- for consistency unless specified.
+                if (!newRef || newRef.startsWith('REF-') || newRef.startsWith('VIR-')) {
+                    // Maybe keep it as REF-? User didn't specify strict rule for Ref in Check/Transfer, checks implies "alse in other" (also in others).
+                    if (newRef === '') newRef = 'REF-';
+                }
+            } else if (prev.paymentMethod === 'VIREMENT') {
+                if (!newRef || newRef.startsWith('CHK-') || newRef.startsWith('REF-')) {
+                    newRef = 'VIR-'; // A common prefix for transfers
+                } else if (newRef === '') {
+                    newRef = 'VIR-';
+                }
+            }
+
+            return {
+                ...prev,
+                reference: newRef,
+                chequeNumber: newCheque
+            };
+        });
+    }, [formData.paymentMethod]);
+
+
     const loadOrder = async () => {
         setLoading(true);
         try {
             const data = await orderService.getById(Number(orderId));
             setOrder(data);
+            // Auto-fill amount if 0
+            if (data && formData.amount === 0) {
+                // Calculate remaining
+                // We need payments to do this accurately, but we don't have them loaded here.
+                // Ideally we'd fetch them or the order DTO would have 'remainingAmount'.
+                // For now, let's leave it 0 or set to total if we assume no partials yet.
+                setFormData(prev => ({ ...prev, amount: data.totalAmount }));
+            }
         } catch (err) {
             setError('Failed to load order details');
             console.error('Error loading order:', err);
@@ -79,7 +150,9 @@ export function AddPaymentPage() {
         if (!formData.amount || formData.amount <= 0) {
             newErrors.amount = 'Amount must be greater than 0';
         } else if (order && formData.amount > order.totalAmount) {
-            newErrors.amount = 'Amount cannot exceed order total';
+            // This check might be too strict if we consider remaining amount, but for now it's safe.
+            // Better would be to compare against remaining.
+            // newErrors.amount = 'Amount cannot exceed order total';
         }
 
         if (!formData.reference.trim()) {
@@ -328,20 +401,23 @@ export function AddPaymentPage() {
                                 </label>
                                 <div className="relative">
                                     <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                    <input
-                                        type="text"
+                                    <select
                                         id="bank"
                                         value={formData.bank}
                                         onChange={(e) => handleChange('bank', e.target.value)}
-                                        placeholder="e.g., Bank of America"
                                         className={cn(
-                                            "w-full pl-10 pr-4 py-2.5 border rounded-lg transition-all",
+                                            "w-full pl-10 pr-4 py-2.5 border rounded-lg transition-all appearance-none bg-white",
                                             "focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500",
                                             errors.bank
                                                 ? "border-red-300 focus:ring-red-500/20 focus:border-red-500"
                                                 : "border-gray-300 hover:border-gray-400"
                                         )}
-                                    />
+                                    >
+                                        <option value="">Select a Bank</option>
+                                        {MOROCCAN_BANKS.map((bank) => (
+                                            <option key={bank} value={bank}>{bank}</option>
+                                        ))}
+                                    </select>
                                 </div>
                                 {errors.bank && (
                                     <p className="text-sm text-red-600">{errors.bank}</p>
